@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VolunteerAI — Smart Resource Coordinator</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">🤝</span>
+      <div>
+        <h1>VolunteerAI</h1>
+        <p>Smart Resource Coordination for NGOs · Powered by Gemini AI</p>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat"><span id="totalNeeds">—</span><label>Active Needs</label></div>
+      <div class="stat"><span id="totalVols">—</span><label>Volunteers</label></div>
+      <div class="stat"><span id="criticalCount">—</span><label>Critical</label></div>
+      <div class="stat"><span id="totalPeople">—</span><label>People Affected</label></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+    <button class="tab" onclick="switchTab('submit-need')">📋 Submit Need</button>
+    <button class="tab" onclick="switchTab('register-vol')">👤 Register Volunteer</button>
+    <button class="tab" onclick="switchTab('matches')">🤝 Match Engine</button>
+    <button class="tab" onclick="switchTab('heatmap')">🗺️ Heatmap</button>
+    <button class="tab" onclick="switchTab('insights')">📈 Insights</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── DASHBOARD TAB ── -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="card">
+      <div class="section-header">
+        <h2>🧠 AI Situation Briefing</h2>
+        <button class="btn-secondary" onclick="loadSummary()">🔄 Refresh</button>
+      </div>
+      <div id="summaryBox" class="summary-text">
+        Click Refresh to generate a Gemini-powered coordinator briefing...
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-header">
+        <h2>🚨 Active Needs (Prioritized)</h2>
+        <button class="btn-secondary" onclick="loadNeeds()">🔄 Refresh</button>
+      </div>
+      <div id="needsList"><div class="loading-state">Click Refresh to load needs</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-header">
+        <h2>🔥 Volunteer Workload Monitor</h2>
+        <button class="btn-secondary" onclick="loadBurnout()">Check</button>
+      </div>
+      <div id="burnoutContainer"><div class="loading-state">Click Check to view workload status</div></div>
+    </div>
+  </div>
+
+  <!-- ── SUBMIT NEED TAB ── -->
+  <div id="tab-submit-need" class="tab-content">
+    <div class="card">
+      <h2>📋 Submit a Community Need</h2>
+      <p class="hint">Fill this form to report a need. Gemini AI will automatically extract urgency, category, and priority.</p>
+
+      <div class="form-group">
+        <label>NGO / Organization Name</label>
+        <input type="text" id="ngoName" placeholder="e.g. Red Cross Mumbai"/>
+      </div>
+      <div class="form-group">
+        <label>Your Name / Contact</label>
+        <input type="text" id="contactName" placeholder="e.g. Priya Sharma, 9876543210"/>
+      </div>
+      <div class="form-group">
+        <label>Describe the Need <span class="required">*</span></label>
+        <textarea id="needDesc" rows="5"
+          placeholder="Describe the situation in plain language. e.g. Flood victims in Kurla East need emergency medical attention. Around 300 people including elderly and children have no access to clean water or food for 2 days. Situation is critical."></textarea>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Location / Area</label>
+          <input type="text" id="needLocation" placeholder="e.g. Kurla East, Mumbai"/>
+        </div>
+        <div class="form-group">
+          <label>Latitude</label>
+          <input type="number" id="needLat" placeholder="e.g. 19.0728" step="any"/>
+        </div>
+        <div class="form-group">
+          <label>Longitude</label>
+          <input type="number" id="needLng" placeholder="e.g. 72.8826" step="any"/>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="submitNeed()">
+        <span id="submitNeedText">⚡ Parse & Submit with Gemini AI</span>
+      </button>
+      <div id="needSubmitResult" class="result-box hidden"></div>
+    </div>
+  </div>
+
+  <!-- ── REGISTER VOLUNTEER TAB ── -->
+  <div id="tab-register-vol" class="tab-content">
+    <div class="card">
+      <h2>👤 Register as a Volunteer</h2>
+      <p class="hint">Volunteers register once. The system matches them to needs automatically based on skills and location.</p>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Full Name <span class="required">*</span></label>
+          <input type="text" id="volName" placeholder="e.g. Arjun Mehta"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" id="volPhone" placeholder="e.g. 9876543210"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Skills (comma-separated)</label>
+        <input type="text" id="volSkills"
+          placeholder="e.g. first aid, food distribution, logistics, mental health counseling"/>
+      </div>
+      <div class="form-group">
+        <label>Select Skill Categories</label>
+        <div class="checkbox-grid" id="skillCheckboxes">
+          <label class="checkbox-item"><input type="checkbox" value="medical, first aid"/> 🏥 Medical / First Aid</label>
+          <label class="checkbox-item"><input type="checkbox" value="food distribution, logistics"/> 🍱 Food / Logistics</label>
+          <label class="checkbox-item"><input type="checkbox" value="teaching, education"/> 📚 Teaching / Education</label>
+          <label class="checkbox-item"><input type="checkbox" value="mental health, counseling"/> 🧠 Mental Health</label>
+          <label class="checkbox-item"><input type="checkbox" value="shelter, construction"/> 🏠 Shelter / Construction</label>
+          <label class="checkbox-item"><input type="checkbox" value="transport, driving"/> 🚗 Transport / Driving</label>
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>Location / Area</label>
+          <input type="text" id="volLocation" placeholder="e.g. Andheri East, Mumbai"/>
+        </div>
+        <div class="form-group">
+          <label>Latitude</label>
+          <input type="number" id="volLat" placeholder="e.g. 19.1136" step="any"/>
+        </div>
+        <div class="form-group">
+          <label>Longitude</label>
+          <input type="number" id="volLng" placeholder="e.g. 72.8697" step="any"/>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Availability</label>
+          <select id="volAvailability">
+            <option value="available">Available Now</option>
+            <option value="available today">Available Today</option>
+            <option value="unavailable">Not Available</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Max Assignments at Once</label>
+          <select id="volCapacity">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="registerVolunteer()">
+        <span id="submitVolText">✅ Register Volunteer</span>
+      </button>
+      <div id="volSubmitResult" class="result-box hidden"></div>
+
+      <!-- Volunteer Table -->
+      <div class="section-header" style="margin-top:28px;">
+        <h3>Registered Volunteers</h3>
+        <button class="btn-secondary" onclick="loadVolunteers()">🔄 Refresh</button>
+      </div>
+      <div id="volunteersTable"><div class="loading-state">Click Refresh to load</div></div>
+    </div>
+  </div>
+
+  <!-- ── MATCH ENGINE TAB ── -->
+  <div id="tab-matches" class="tab-content">
+    <div class="card">
+      <div class="section-header">
+        <h2>🤝 Volunteer Match Engine</h2>
+        <div class="btn-group">
+          <button class="btn-primary" onclick="loadMatches(true)">🤖 Smart Match (Gemini)</button>
+          <button class="btn-outline" onclick="loadMatches(false)">⚡ Fast Match</button>
+        </div>
+      </div>
+      <p class="hint">Smart Match uses Gemini AI for semantic skill understanding. Fast Match uses keyword scoring — instant but less accurate.</p>
+      <div id="matchesContainer"><div class="loading-state">Click a match button to start</div></div>
+    </div>
+  </div>
+  <!-- Resource Gap section inside matches tab -->
+<div class="card" style="margin-top:20px">
+  <div class="section-header">
+    <h2>📉 Resource Gap Analysis</h2>
+    <button class="btn-secondary" onclick="loadResourceGap()">Analyze</button>
+  </div>
+  <p class="hint">Shows where volunteer skills are insufficient to meet active needs — the core of intelligent allocation.</p>
+  <div id="resourceGapContainer">
+    <div class="loading-state">Click Analyze to see resource gaps</div>
+  </div>
+</div>
+
+  <!-- ── HEATMAP TAB ── -->
+  <div id="tab-heatmap" class="tab-content">
+  <div class="card">
+    <div class="section-header">
+      <h2>🗺️ Need vs Availability Heatmap</h2>
+      <div class="btn-group">
+        <button class="btn-secondary" onclick="loadHeatmap('both')">Show Both</button>
+        <button class="btn-outline" onclick="loadHeatmap('needs')">Needs Only</button>
+        <button class="btn-outline" onclick="loadHeatmap('volunteers')">Volunteers Only</button>
+      </div>
+    </div>
+    <p class="hint">Red/Orange = active needs by urgency. Blue = available volunteers. See where help exists vs where it's needed.</p>
+    <div id="heatmapLegend" class="map-legend hidden">
+      <span class="legend-dot critical"></span>Critical Need &nbsp;
+      <span class="legend-dot high"></span>High Need &nbsp;
+      <span class="legend-dot medium"></span>Medium Need &nbsp;
+      <span class="legend-dot volunteer-dot"></span>Volunteer
+    </div>
+    <div id="mapPoints" class="map-grid"></div>
+  </div>
+</div>
+
+  <!-- ── INSIGHTS TAB ── -->
+  <div id="tab-insights" class="tab-content">
+    <div class="card">
+      <div class="section-header">
+        <h2>📈 Historical Pattern Insights</h2>
+        <button class="btn-secondary" onclick="loadInsights()">🔄 Refresh</button>
+      </div>
+      <p class="hint">Computed from live data in Google Sheets. Updates as needs are submitted and completed.</p>
+      <div id="insightsContainer"><div class="loading-state">Click Refresh to load insights</div></div>
+    </div>
+  </div>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

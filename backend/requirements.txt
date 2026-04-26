@@ -1,0 +1,8 @@
+flask
+flask-cors
+google-genai
+gspread
+google-auth
+python-dotenv
+requests
+gunicorn

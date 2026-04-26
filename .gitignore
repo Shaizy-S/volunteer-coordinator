@@ -1,0 +1,21 @@
+# Python virtual environment
+backend/venv/
+backend/env/
+
+# Python cache
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+
+# Secret files - NEVER upload these
+backend/.env
+backend/service_account.json
+
+# Mac junk
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Windows junk
+Thumbs.db
