@@ -85,7 +85,7 @@ async function submitNeed() {
 
   if (data.success) {
     const n = data.need;
-    const source = data.parsed_by === "gemini" ? "🤖 Gemini AI" : "🤖 Gemini AI";
+    const source = data.parsed_by === "gemini" ? "🤖 Gemini AI" : " Rule-Based";
     showResult(resultBox, "success",
       `✅ <strong>Need submitted successfully!</strong><br>
        Parsed by: ${source}<br>
